@@ -1,6 +1,7 @@
 from torch import nn
 # Root directory for dataset
-dataroot = "/home/ubuntu/dcgan/img"
+# dataroot = "/home/ubuntu/dcgan/img"
+dataroot="/home/ubuntu/dcgan/minist"
 
 # Number of workers for dataloader
 workers = 128
@@ -25,7 +26,7 @@ ngf = 64
 ndf = 64
 
 # Number of training epochs
-num_epochs = 5
+num_epochs = 100
 
 # Learning rate for optimizers
 lr = 0.0002

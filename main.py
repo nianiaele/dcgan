@@ -144,8 +144,10 @@ for epoch in range(num_epochs):
         netG.zero_grad()
         label.fill_(real_label)  # fake labels are real for generator cost
         # Since we just updated D, perform another forward pass of all-fake batch through D
+        fake=fake.cuda()
         output = netD(fake).view(-1)
         # Calculate G's loss based on this output
+
         errG = criterion(output, label)
         # Calculate gradients for G
         errG.backward()
