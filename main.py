@@ -20,6 +20,7 @@ from Generator import *
 from Discriminator import *
 from config import *
 import torchvision.models as models
+from BottomNet import BottomNet
 
 
 # Set random seem for reproducibility
@@ -61,7 +62,7 @@ if (device.type == 'cuda') and (ngpu > 1):
 netG.apply(weights_init)
 
 # Print the model
-print(netG)
+#print(netG)
 
 # Create the Discriminator
 netD = Discriminator(ngpu).to(device)
@@ -93,7 +94,9 @@ optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 
 #embedding layer after the
-vgg16 = models.vgg16(pretrained=True)
+vgg16  = models.vgg16(pretrained=True)
+cnnEmbedding=BottomNet(vgg16,cnnEmbeddingNum)
+cnnEmbedding.to(device)
 
 # Training Loop
 
@@ -133,7 +136,8 @@ for epoch in range(num_epochs):
         fake = netG(noise)
         label.fill_(fake_label)
 
-        norm=fake.view(fake.size()[0],-1)
+        normFake=cnnEmbedding(fake)
+        norm=fake.view(normFake.size()[0],-1)
         normSum=torch.sum(norm,dim=1)
         norm=torch.div(norm,normSum.view(-1,1))
         normMean = torch.mean(norm,dim=0)
