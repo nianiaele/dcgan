@@ -38,8 +38,11 @@ beta1 = 0.5
 # Number of GPUs available. Use 0 for CPU mode.
 ngpu = 1
 
-#Number of cnn embedding layers
-cnnEmbeddingNum=5
+#The initial weight of singular value in G loss
+sWeight=0.001
+
+#Number of cnn embedding layers, None means using all layers
+cnnEmbeddingNum=None
 
 
 # custom weights initialization called on netG and netD

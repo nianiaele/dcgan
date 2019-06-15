@@ -97,6 +97,7 @@ optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 vgg16  = models.vgg16(pretrained=True)
 cnnEmbedding=BottomNet(vgg16,cnnEmbeddingNum)
 cnnEmbedding.to(device)
+cnnEmbedding.train()
 
 # Training Loop
 
@@ -117,6 +118,7 @@ for epoch in range(num_epochs):
         ###########################
         ## Train with all-real batch
         netD.zero_grad()
+
         # Format batch
         real_cpu = data[0].to(device)
         b_size = real_cpu.size(0)
@@ -136,6 +138,7 @@ for epoch in range(num_epochs):
         fake = netG(noise)
         label.fill_(fake_label)
 
+        cnnEmbedding.zero_grad()
         normFake=cnnEmbedding(fake)
         norm=fake.view(normFake.size()[0],-1)
         normSum=torch.sum(norm,dim=1)
@@ -176,7 +179,7 @@ for epoch in range(num_epochs):
         # Calculate G's loss based on this output
 
         # errG = criterion(output, label)
-        errG = criterion(output, label) - maxSingular*0.0001
+        errG = criterion(output, label) - maxSingular*sWeight
         # Calculate gradients for G
         errG.backward()
         D_G_z2 = output.mean().item()
@@ -188,6 +191,9 @@ for epoch in range(num_epochs):
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f, max singular is %.4f'
                   % (epoch, num_epochs, i, len(dataloader),
                      errD.item(), errG.item(), D_x, D_G_z1, D_G_z2,maxSingular))
+            if sWeight<0.5:
+                sWeight=sWeight*2
+                print("singular weight turned to be "+sWeight)
 
         # Save Losses for plotting later
         G_losses.append(errG.item())
