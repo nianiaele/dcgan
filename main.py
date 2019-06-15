@@ -18,13 +18,17 @@ import matplotlib.animation as animation
 from IPython.display import HTML
 from Generator import *
 from Discriminator import *
+from config import *
+import torchvision.models as models
+
+
 # Set random seem for reproducibility
 manualSeed = 999
 #manualSeed = random.randint(1, 10000) # use if you want new results
 print("Random Seed: ", manualSeed)
 random.seed(manualSeed)
 torch.manual_seed(manualSeed)
-from config import *
+
 
 
 
@@ -88,6 +92,8 @@ fake_label = 0
 optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 
+#embedding layer after the
+vgg16 = models.vgg16(pretrained=True)
 
 # Training Loop
 
@@ -126,17 +132,34 @@ for epoch in range(num_epochs):
         # Generate fake image batch with G
         fake = netG(noise)
         label.fill_(fake_label)
-        # Classify all fake batch with D
-        output = netD(fake.detach()).view(-1)
-        # Calculate D's loss on the all-fake batch
-        errD_fake = criterion(output, label)
-        # Calculate the gradients for this batch
-        errD_fake.backward()
-        D_G_z1 = output.mean().item()
-        # Add the gradients from the all-real and all-fake batches
-        errD = errD_real + errD_fake
-        # Update D
-        optimizerD.step()
+
+        norm=fake.view(fake.size()[0],-1)
+        normSum=torch.sum(norm,dim=1)
+        norm=torch.div(norm,normSum.view(-1,1))
+        normMean = torch.mean(norm,dim=0)
+        norm=torch.sub(norm,normMean)
+
+        u, s, v = torch.svd(norm)
+        maxSingular=torch.max(s)
+        # maxSingular=1
+        errD=torch.tensor(0)
+        D_G_z1=torch.tensor(0)
+        if iters % 5 == 0:
+        # if True:
+            # Classify all fake batch with D
+            output = netD(fake.detach()).view(-1)
+            # Calculate D's loss on the all-fake batch
+            errD_fake = criterion(output, label)
+            # Calculate the gradients for this batch
+            errD_fake.backward()
+            D_G_z1 = output.mean().item()
+            # Add the gradients from the all-real and all-fake batches
+            errD = errD_real + errD_fake
+            # Update D
+
+            optimizerD.step()
+
+
 
         ############################
         # (2) Update G network: maximize log(D(G(z)))
@@ -144,11 +167,12 @@ for epoch in range(num_epochs):
         netG.zero_grad()
         label.fill_(real_label)  # fake labels are real for generator cost
         # Since we just updated D, perform another forward pass of all-fake batch through D
-        fake=fake.cuda()
+        # fake=fake.cuda()
         output = netD(fake).view(-1)
         # Calculate G's loss based on this output
 
-        errG = criterion(output, label)
+        # errG = criterion(output, label)
+        errG = criterion(output, label) - maxSingular*0.0001
         # Calculate gradients for G
         errG.backward()
         D_G_z2 = output.mean().item()
@@ -157,9 +181,9 @@ for epoch in range(num_epochs):
 
         # Output training stats
         if i % 50 == 0:
-            print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
+            print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f, max singular is %.4f'
                   % (epoch, num_epochs, i, len(dataloader),
-                     errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
+                     errD.item(), errG.item(), D_x, D_G_z1, D_G_z2,maxSingular))
 
         # Save Losses for plotting later
         G_losses.append(errG.item())

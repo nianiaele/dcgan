@@ -1,13 +1,14 @@
 from torch import nn
 # Root directory for dataset
 # dataroot = "/home/ubuntu/dcgan/img"
-dataroot="/home/ubuntu/dcgan/minist"
+# dataroot="/home/ubuntu/dcgan/minist"
+dataroot="/home/lixin/dcgan/minist"
 
 # Number of workers for dataloader
 workers = 128
 
 # Batch size during training
-batch_size = 128
+batch_size = 4
 
 # Spatial size of training images. All images will be resized to this
 #   size using a transformer.
