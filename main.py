@@ -14,8 +14,6 @@ import torchvision.transforms as transforms
 import torchvision.utils as vutils
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from IPython.display import HTML
 from Generator import *
 from Discriminator import *
 from config import *
@@ -151,7 +149,7 @@ for epoch in range(num_epochs):
         # maxSingular=1
         errD=torch.tensor(0)
         D_G_z1=torch.tensor(0)
-        if iters % 5 == 0:
+        if iters % 4 == 0:
         # if True:
             # Classify all fake batch with D
             output = netD(fake.detach()).view(-1)
@@ -178,8 +176,14 @@ for epoch in range(num_epochs):
         output = netD(fake).view(-1)
         # Calculate G's loss based on this output
 
-        # errG = criterion(output, label)
-        errG = criterion(output, label) - maxSingular*sWeight
+
+        # errG = criterion(output, label) - maxSingular*sWeight
+
+        if iters%2==0:
+            errG = criterion(output, label)
+        else:
+            errG=maxSingular*sWeight
+
         # Calculate gradients for G
         errG.backward()
         D_G_z2 = output.mean().item()
@@ -191,9 +195,9 @@ for epoch in range(num_epochs):
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f, max singular is %.4f'
                   % (epoch, num_epochs, i, len(dataloader),
                      errD.item(), errG.item(), D_x, D_G_z1, D_G_z2,maxSingular))
-            if sWeight<0.5:
-                sWeight=sWeight*2
-                print("singular weight turned to be "+sWeight)
+            if iters % 5 == 0:
+                print("lossD is "+str(errD.item()))
+
 
         # Save Losses for plotting later
         G_losses.append(errG.item())
@@ -204,6 +208,11 @@ for epoch in range(num_epochs):
             with torch.no_grad():
                 fake = netG(fixed_noise).detach().cpu()
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+
+        if iters%500==499:
+            if sWeight<20:
+                sWeight=sWeight+0.1
+                print("singular weight turned to be "+str(sWeight))
 
         iters += 1
 

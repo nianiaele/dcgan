@@ -1,14 +1,14 @@
 from torch import nn
 # Root directory for dataset
 # dataroot = "/home/ubuntu/dcgan/img"
-# dataroot="/home/ubuntu/dcgan/minist"
-dataroot="/home/lixin/dcgan/minist"
+dataroot="/home/ubuntu/dcgan/minist"
+# dataroot="/home/lixin/dcgan/minist"
 
 # Number of workers for dataloader
 workers = 128
 
 # Batch size during training
-batch_size = 4
+batch_size = 128
 
 # Spatial size of training images. All images will be resized to this
 #   size using a transformer.
@@ -39,7 +39,7 @@ beta1 = 0.5
 ngpu = 1
 
 #The initial weight of singular value in G loss
-sWeight=0.001
+sWeight=0
 
 #Number of cnn embedding layers, None means using all layers
 cnnEmbeddingNum=None
