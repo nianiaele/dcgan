@@ -149,7 +149,7 @@ for epoch in range(num_epochs):
         # maxSingular=1
         errD=torch.tensor(0)
         D_G_z1=torch.tensor(0)
-        if iters % 4 == 0:
+        if iters % 5 == 4:
         # if True:
             # Classify all fake batch with D
             output = netD(fake.detach()).view(-1)
@@ -179,10 +179,12 @@ for epoch in range(num_epochs):
 
         # errG = criterion(output, label) - maxSingular*sWeight
 
+        # errG = criterion(output, label)
+
         if iters%2==0:
             errG = criterion(output, label)
         else:
-            errG=maxSingular*sWeight
+            errG=-maxSingular*sWeight
 
         # Calculate gradients for G
         errG.backward()
