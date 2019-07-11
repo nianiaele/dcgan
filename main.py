@@ -213,7 +213,7 @@ for epoch in range(num_epochs):
 
         if iters%500==499:
             if sWeight<20:
-                sWeight=sWeight+0.1
+                sWeight=sWeight+0.5
                 print("singular weight turned to be "+str(sWeight))
 
         iters += 1
