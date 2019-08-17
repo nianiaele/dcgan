@@ -149,7 +149,7 @@ for epoch in range(num_epochs):
         # maxSingular=1
         errD=torch.tensor(0)
         D_G_z1=torch.tensor(0)
-        if iters % 5 == 4:
+        if iters % D_iter == D_iter-1:
         # if True:
             # Classify all fake batch with D
             output = netD(fake.detach()).view(-1)
@@ -179,12 +179,12 @@ for epoch in range(num_epochs):
 
         # errG = criterion(output, label) - maxSingular*sWeight
 
-        # errG = criterion(output, label)
+        errG = criterion(output, label)
 
-        if iters%2==0:
-            errG = criterion(output, label)
-        else:
-            errG=-maxSingular*sWeight
+        # if iters%2==0:
+        #     errG = criterion(output, label)
+        # else:
+        #     errG=-maxSingular*sWeight
 
         # Calculate gradients for G
         errG.backward()
@@ -195,9 +195,8 @@ for epoch in range(num_epochs):
         # Output training stats
         if i % 50 == 0:
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f, max singular is %.4f'
-                  % (epoch, num_epochs, i, len(dataloader),
-                     errD.item(), errG.item(), D_x, D_G_z1, D_G_z2,maxSingular))
-            if iters % 5 == 0:
+                  % (epoch, num_epochs, i, len(dataloader),errD.item(), errG.item(), D_x, D_G_z1, D_G_z2,maxSingular))
+            if iters % D_iter == D_iter-1:
                 print("lossD is "+str(errD.item()))
 
 
@@ -212,7 +211,7 @@ for epoch in range(num_epochs):
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
         if iters%500==499:
-            if sWeight<20:
+            if sWeight<5:
                 sWeight=sWeight+0.5
                 print("singular weight turned to be "+str(sWeight))
 

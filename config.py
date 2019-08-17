@@ -1,7 +1,8 @@
 from torch import nn
+
 # Root directory for dataset
 # dataroot = "/home/ubuntu/dcgan/img"
-dataroot="/home/ubuntu/dcgan/minist"
+dataroot = "/home/ubuntu/dcgan/minist"
 # dataroot="/home/lixin/dcgan/minist"
 
 # Number of workers for dataloader
@@ -38,11 +39,14 @@ beta1 = 0.5
 # Number of GPUs available. Use 0 for CPU mode.
 ngpu = 1
 
-#The initial weight of singular value in G loss
-sWeight=0
+# The initial weight of singular value in G loss
+sWeight = 0
 
-#Number of cnn embedding layers, None means using all layers
-cnnEmbeddingNum=None
+# Number of cnn embedding layers, None means using all layers
+cnnEmbeddingNum = None
+
+# Proportion(D/All) of training batches
+D_iter = 5
 
 
 # custom weights initialization called on netG and netD
