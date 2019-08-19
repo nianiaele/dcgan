@@ -92,7 +92,7 @@ optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
 optimizerG = optim.Adam(netG.parameters(), lr=lr, betas=(beta1, 0.999))
 
 #embedding layer after the
-vgg16  = models.vgg16(pretrained=True)
+vgg16  = models.alexnet(pretrained=True)
 cnnEmbedding=BottomNet(vgg16,cnnEmbeddingNum)
 cnnEmbedding.to(device)
 cnnEmbedding.train()
@@ -138,7 +138,8 @@ for epoch in range(num_epochs):
 
         cnnEmbedding.zero_grad()
         normFake=cnnEmbedding(fake)
-        norm=fake.view(normFake.size()[0],-1)
+
+        norm=normFake.view(normFake.size()[0],-1)
         normSum=torch.sum(norm,dim=1)
         norm=torch.div(norm,normSum.view(-1,1))
         normMean = torch.mean(norm,dim=0)
@@ -179,12 +180,13 @@ for epoch in range(num_epochs):
 
         # errG = criterion(output, label) - maxSingular*sWeight
 
-        errG = criterion(output, label)
+        # errG = criterion(output, label)
 
-        # if iters%2==0:
-        #     errG = criterion(output, label)
-        # else:
-        #     errG=-maxSingular*sWeight
+        # errG=-maxSingular*sWeight
+        if iters%2==0:
+            errG = criterion(output, label)
+        else:
+            errG=-maxSingular*sWeight
 
         # Calculate gradients for G
         errG.backward()

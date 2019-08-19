@@ -43,7 +43,7 @@ ngpu = 1
 sWeight = 0
 
 # Number of cnn embedding layers, None means using all layers
-cnnEmbeddingNum = None
+cnnEmbeddingNum = 3
 
 # Proportion(D/All) of training batches
 D_iter = 5
